@@ -1,0 +1,28 @@
+# .air.toml
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp/main ."
+bin = "tmp/main"
+full_bin = "./tmp/main"
+exclude_dir = ["tmp", "vendor"]
+exclude_file = []
+include_ext = ["go", "mod", "sum"] # Watch Go files and module files
+delay = 800                        # Slightly faster refresh
+stop_on_error = true
+send_interrupt = true
+kill_delay = 400                   # Faster process termination
+
+[log]
+time = false
+verbose = true # Show more build details
+
+[color]
+main = "blue"
+watcher = "green"
+build = "yellow"
+runner = "cyan"
+
+[misc]
+clean_on_exit = true
