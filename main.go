@@ -7,12 +7,14 @@ import (
 
 func main() {
 	router := gin.Default()
+	// Test Handler
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "Hello, World!",
 		})
 	})
+	// User Handler
 	router.POST("/api/auth/signup", api.SignupUser)
-	// router.POST("/api/auth/signin", api.PostUser)
+	router.POST("/api/auth/signin", api.SigninUser)
 	router.Run(":3000")
 }
