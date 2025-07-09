@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sinhadeepak1115/personal-finance/models"
 )
 
 type UserSignup struct {
@@ -15,6 +16,27 @@ type UserSignup struct {
 type UserSingin struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `jsin:"password" binding:"required,min=6"`
+}
+
+func GetAllUser(c *gin.Context) {
+	var users []models.User
+	result := models.DB.Find(&users)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve users"})
+		return
+	}
+	response := make([]gin.H, len(users))
+	for i, user := range users {
+		response[i] = gin.H{
+			"id":    user.ID,
+			"name":  user.Name,
+			"email": user.Email,
+		}
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"users": response,
+		"count": len(users),
+	})
 }
 
 func SignupUser(c *gin.Context) {

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/sinhadeepak1115/personal-finance/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -12,5 +13,6 @@ func ConnectDB() {
 	if err != nil {
 		panic(err)
 	}
+	db.AutoMigrate(&models.User{})
 	DB = db
 }

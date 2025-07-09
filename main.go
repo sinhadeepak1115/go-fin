@@ -3,10 +3,14 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/sinhadeepak1115/personal-finance/api"
+	"github.com/sinhadeepak1115/personal-finance/config"
 )
 
 func main() {
 	router := gin.Default()
+
+	// Connecting the database
+	config.ConnectDB()
 	// Test Handler
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
