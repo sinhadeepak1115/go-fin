@@ -18,6 +18,7 @@ func main() {
 		})
 	})
 	// User Handler
+	router.GET("/api", api.GetAllUser)
 	router.POST("/api/auth/signup", api.SignupUser)
 	router.POST("/api/auth/signin", api.SigninUser)
 	router.Run(":3000")
