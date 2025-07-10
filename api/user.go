@@ -11,12 +11,12 @@ import (
 type UserSignup struct {
 	Email    string `json:"email" binding:"required,email"`
 	Name     string `json:"name" `
-	Password string `jsin:"password" binding:"required,min=6"`
+	Password string `json:"password" binding:"required,min=6"`
 }
 
 type UserSingin struct {
 	Email    string `json:"email" binding:"required,email"`
-	Password string `jsin:"password" binding:"required,min=6"`
+	Password string `json:"password" binding:"required,min=6"`
 }
 
 // Get user
