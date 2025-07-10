@@ -14,5 +14,6 @@ func ConnectDB() {
 		panic(err)
 	}
 	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Transaction{})
 	DB = db
 }
