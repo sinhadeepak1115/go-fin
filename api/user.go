@@ -2,11 +2,17 @@ package api
 
 import (
 	"net/http"
+	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
+
 	"github.com/sinhadeepak1115/personal-finance/config"
 	"github.com/sinhadeepak1115/personal-finance/models"
 )
+
+var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 type UserSignup struct {
 	Email    string `json:"email" binding:"required,email"`
@@ -17,6 +23,12 @@ type UserSignup struct {
 type UserSingin struct {
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=6"`
+}
+
+type Claims struct {
+	UserID uint   `json:"user_id"`
+	Email  string `json:"email"`
+	jwt.RegisteredClaims
 }
 
 // Get user
@@ -55,7 +67,7 @@ func SignupUser(c *gin.Context) {
 		return
 	}
 
-	// Bycrypt Password
+	// TODO: Bycrypt Password
 
 	// Create new User
 	user := models.User{
@@ -94,12 +106,58 @@ func SigninUser(c *gin.Context) {
 		return
 	}
 
+	// Generate JWT token
+	expirationTime := time.Now().Add(24 * time.Hour)
+	claims := &Claims{
+		UserID: user.ID,
+		Email:  user.Email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtSecret)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create token"})
+		return
+	}
+
 	response := gin.H{
 		"message": "User logged in successfully",
+		"token":   tokenString,
 		"user": gin.H{
 			"email":    req.Email,
 			"password": req.Password,
 		},
 	}
 	c.JSON(http.StatusOK, response)
+}
+
+func JWTMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		tokenString := c.GetHeader("Authorization")
+		if tokenString == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header is required"})
+			c.Abort()
+			return
+		}
+
+		claims := &Claims{}
+
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+			return jwtSecret, nil
+		})
+
+		if err != nil || !token.Valid {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.Abort()
+			return
+		}
+
+		c.Set("user_id", claims.UserID)
+		c.Set("user_email", claims.Email)
+		c.Next()
+	}
 }
